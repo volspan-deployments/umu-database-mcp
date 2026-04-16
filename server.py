@@ -21,6 +21,7 @@ CSV_URL = "https://raw.githubusercontent.com/Open-Wine-components/umu-database/m
 
 @mcp.tool()
 async def query_umu_database(
+    _track("query_umu_database")
     store: Optional[str] = None,
     codename: Optional[str] = None,
     umu_id: Optional[str] = None,
@@ -62,6 +63,7 @@ async def validate_umu_csv(csv_path: str) -> dict:
     Checks column count, required fields, supported store values, and duplicate entries.
     Use this before running an import or when reviewing a CSV for contribution.
     Returns validation errors in GitHub Actions annotation format."""
+    _track("validate_umu_csv")
     errors = []
     warnings = []
 
@@ -151,6 +153,7 @@ async def import_umu_database() -> dict:
     Drops and recreates the game and gamerelease tables, then imports all records in a single transaction.
     Use this to refresh the local database with the latest upstream data, typically on a schedule or after upstream CSV changes.
     NOTE: This tool fetches the upstream CSV and reports what would be imported. Actual DB write requires local MySQL credentials."""
+    _track("import_umu_database")
     async with httpx.AsyncClient(timeout=60.0) as client:
         response = await client.get(CSV_URL)
         response.raise_for_status()
@@ -207,6 +210,7 @@ async def search_gog_galaxy_db(title: str) -> dict:
     """Search the GOG Galaxy gamesdb API for games matching a title.
     Returns matching games filtered to supported platforms along with their platform-specific release IDs.
     Use this to look up GOG release IDs, platform availability, or to cross-reference a game title against GOG's catalog."""
+    _track("search_gog_galaxy_db")
     import urllib.parse
 
     params = urllib.parse.urlencode({"title": title})
@@ -259,6 +263,7 @@ async def find_missing_amazon_games(library_path: str, database_path: str) -> di
     Amazon games not yet present in the UMU database. Outputs CSV-formatted lines including Steam ID
     and UMU ID for each missing game. Use this when adding Amazon games to the UMU database or auditing
     Amazon library coverage."""
+    _track("find_missing_amazon_games")
     if not os.path.exists(library_path):
         return {
             "status": "error",
